@@ -1,0 +1,39 @@
+{
+  "name": "saleor-support-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "support-agent": "./dist/cli.js"
+  },
+  "scripts": {
+    "agent:watch": "concurrently -n tsc,knip -c blue,magenta \"tsc -p tsconfig.json --noEmit --watch --preserveWatchOutput\" \"knip --watch --include-entry-exports --no-config-hints\"",
+    "audit:all": "pnpm check && pnpm audit:unused",
+    "audit:unused": "knip --include-entry-exports --no-config-hints && knip --strict --include-entry-exports --no-config-hints",
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsx src/cli.ts",
+    "prepare": "simple-git-hooks",
+    "prod": "tsx src/cli.ts prod",
+    "sandbox": "tsx src/cli.ts sandbox",
+    "skill:install": "node scripts/install-skill.mjs",
+    "skill:init": "node scripts/install-skill.mjs --project",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "cac": "^7.0.0",
+    "dotenv": "^16.4.7",
+    "graphql": "^16.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "concurrently": "^9.2.1",
+    "knip": "^6.14.1",
+    "simple-git-hooks": "^2.13.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm audit:all"
+  }
+}
