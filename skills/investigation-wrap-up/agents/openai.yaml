@@ -1,0 +1,7 @@
+interface:
+  display_name: "Wrap Up Investigation"
+  short_description: "Finalize a Saleor support case report"
+  default_prompt: "Wrap up this Saleor support investigation and write the report."
+
+policy:
+  allow_implicit_invocation: true
