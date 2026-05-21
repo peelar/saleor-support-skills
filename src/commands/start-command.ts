@@ -12,6 +12,14 @@ import { UserError } from "../errors.js";
 
 type EnvValueMap = Partial<Record<SaleorApiUrlEnvVar, string>>;
 
+const saleorApiUrlInputLabels: Record<SaleorApiUrlEnvVar, string> = {
+  SALEOR_PROD_API_URL: "Customer/prod Saleor GraphQL endpoint URL",
+  SALEOR_SANDBOX_API_URL: "Sandbox Saleor GraphQL endpoint URL",
+};
+
+const saleorApiUrlSetupExplanation =
+  "This setup asks for the customer/prod and sandbox Saleor GraphQL endpoint URLs. They are saved in .env so later prod and sandbox commands know which environments to use.";
+
 export async function configureSaleorApiEnvVars(): Promise<void> {
   const values: EnvValueMap = {};
   const invalidMessages: string[] = [];
@@ -19,7 +27,7 @@ export async function configureSaleorApiEnvVars(): Promise<void> {
   for (const name of saleorApiUrlEnvVars) {
     const value = process.env[name];
     if (!value) {
-      invalidMessages.push(`${name} is missing`);
+      invalidMessages.push(`${saleorApiUrlInputDescription(name)} is missing`);
       continue;
     }
 
@@ -27,7 +35,7 @@ export async function configureSaleorApiEnvVars(): Promise<void> {
       values[name] = validateSaleorApiUrl(name, value);
     } catch (error) {
       if (error instanceof UserError) {
-        invalidMessages.push(error.message);
+        invalidMessages.push(describeSaleorApiUrlError(name, error.message));
       } else {
         throw error;
       }
@@ -37,13 +45,18 @@ export async function configureSaleorApiEnvVars(): Promise<void> {
   if (!input.isTTY || !output.isTTY) {
     if (invalidMessages.length > 0) {
       throw new UserError(
-        `Cannot prompt for Saleor endpoint configuration in a non-interactive shell:\n${invalidMessages
+        `${saleorApiUrlSetupExplanation}\n\nCannot prompt for Saleor endpoint configuration in a non-interactive shell:\n${invalidMessages
           .map((message) => `- ${message}`)
           .join("\n")}`,
       );
     }
-    console.log("Saleor endpoint env vars are valid.");
+    console.log("Saleor endpoint URLs are valid.");
     return;
+  }
+
+  if (invalidMessages.length > 0) {
+    console.log(saleorApiUrlSetupExplanation);
+    console.log("");
   }
 
   const promptedValues = await promptForMissingOrInvalidValues(values);
@@ -55,7 +68,7 @@ export async function configureSaleorApiEnvVars(): Promise<void> {
     process.env[name] = value;
   }
 
-  console.log(changed ? `Saved Saleor endpoint env vars to ${envPath}` : "Saleor endpoint env vars are valid.");
+  console.log(changed ? `Saved Saleor endpoint URLs to ${envPath}` : "Saleor endpoint URLs are valid.");
 }
 
 async function promptForMissingOrInvalidValues(existingValues: EnvValueMap): Promise<EnvValueMap> {
@@ -82,13 +95,13 @@ async function promptForValidUrl(
   name: SaleorApiUrlEnvVar,
 ): Promise<string> {
   while (true) {
-    const value = await rl.question(`${name}: `);
+    const value = await rl.question(`${saleorApiUrlInputDescription(name)}: `);
 
     try {
       return validateSaleorApiUrl(name, value);
     } catch (error) {
       if (error instanceof UserError) {
-        console.error(error.message);
+        console.error(describeSaleorApiUrlError(name, error.message));
         continue;
       }
       throw error;
@@ -147,11 +160,19 @@ function isSaleorApiUrlEnvVar(value: string): value is SaleorApiUrlEnvVar {
 function completeEnvValueMap(values: EnvValueMap): Record<SaleorApiUrlEnvVar, string> {
   for (const name of saleorApiUrlEnvVars) {
     if (!values[name]) {
-      throw new UserError(`${name} is required`);
+      throw new UserError(`${saleorApiUrlInputDescription(name)} is required`);
     }
   }
 
   return values as Record<SaleorApiUrlEnvVar, string>;
+}
+
+function saleorApiUrlInputDescription(name: SaleorApiUrlEnvVar): string {
+  return `${saleorApiUrlInputLabels[name]} (${name})`;
+}
+
+function describeSaleorApiUrlError(name: SaleorApiUrlEnvVar, message: string): string {
+  return message.replace(name, saleorApiUrlInputDescription(name));
 }
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {

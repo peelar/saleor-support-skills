@@ -4,9 +4,9 @@ Local CLI plus installable coding-agent skills for API-only Saleor support inves
 
 ## Purpose
 
-This tool gives support agents a repeatable, file-backed workflow for investigating Saleor API bug reports. It starts a case directory, records the intake, keeps customer/prod GraphQL access read-only, gives the agent safe commands for schema/query/mutation work, and collects the evidence needed for a final root-cause report.
+This tool helps support agents investigate Saleor API bug reports in a consistent way. It keeps customer data safe, separates read-only production checks from sandbox testing, and helps collect the evidence needed to explain what happened.
 
-It solves the common support problem where an investigation spans customer data, sandbox reproduction, Saleor source/docs research, draft fixes, and final reporting. Instead of scattering that work across chat history and ad hoc commands, the harness keeps it under `cases/<case-id>/` with explicit safety boundaries.
+It is meant for investigations that require more than a quick answer: checking customer data, reproducing behavior safely, reading Saleor docs and source code to confirm behavior, and preparing a clear final report.
 
 ## Run It
 
@@ -23,6 +23,14 @@ Use the agent-first flow for real investigations:
 ```text
 Use $investigate to investigate this Saleor API bug report: <paste customer report>
 ```
+
+## Prod And Sandbox Envs
+
+`prod` is the customer or production Saleor environment. It is for read-only discovery: schemas, queries, and local inspection of mutation files.
+
+`sandbox` is the controlled reproduction environment. Use it for writes, setup, checkout flows, and mutation execution while testing a hypothesis.
+
+Keep `SALEOR_*` URLs and tokens in `.env`, then choose the target explicitly with `pnpm prod ...` or `pnpm sandbox ...`.
 
 For manual CLI use:
 

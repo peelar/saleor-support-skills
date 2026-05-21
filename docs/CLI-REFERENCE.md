@@ -34,7 +34,7 @@ SALEOR_DOCS_DIR=/Users/adrianpilarczyk/Code/saleor/saleor-docs
 
 Endpoint URLs must point at Saleor GraphQL endpoints and include `/graphql/`.
 
-To configure or validate the endpoint env vars interactively:
+To configure or validate the endpoint URLs interactively:
 
 ```bash
 pnpm dev start
