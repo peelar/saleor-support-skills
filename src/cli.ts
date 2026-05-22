@@ -106,11 +106,11 @@ function buildRootCli(): CAC {
     });
 
   cli
-    .command("mutation <action> <env> [...args]", "Create or run mutation files")
+    .command("mutation <action> <env> [...args]", "Create, inspect, or run mutation files")
     .option("--variables <path>", "JSON variables file")
     .option("--vars <path>", "Alias for --variables")
     .option("--case <caseId>", "Case ID")
-    .option("--execute", "Compatibility no-op; no longer required for sandbox mutations")
+    .option("--execute", "Compatibility no-op; sandbox runs without it and prod never executes")
     .action((action: string, envValue: string, args: string[], options: GraphqlOptionInput) =>
       run(() => runMutationAction(action, parseEnvName(envValue), args, options)),
     );
@@ -152,11 +152,11 @@ function buildEnvCli(env: EnvName): CAC {
     });
 
   cli
-    .command("mutation <action> [...args]", `Create or run ${env} mutation files`)
+    .command("mutation <action> [...args]", mutationCommandDescription(env))
     .option("--variables <path>", "JSON variables file")
     .option("--vars <path>", "Alias for --variables")
     .option("--case <caseId>", "Case ID")
-    .option("--execute", "Compatibility no-op; no longer required for sandbox mutations")
+    .option("--execute", executeOptionDescription(env))
     .action((action: string, args: string[], options: GraphqlOptionInput) => run(() => runMutationAction(action, env, args, options)));
 
   return cli;
@@ -283,6 +283,18 @@ function run<T extends unknown[]>(action: AsyncAction | ((...args: T) => Promise
 
 function isEnvName(value: string | undefined): value is EnvName {
   return value === "prod" || value === "sandbox";
+}
+
+function mutationCommandDescription(env: EnvName): string {
+  return env === "prod"
+    ? "Create or inspect prod mutation drafts without network execution"
+    : "Create or run sandbox mutation files";
+}
+
+function executeOptionDescription(env: EnvName): string {
+  return env === "prod"
+    ? "Compatibility no-op; prod mutations are inspection-only"
+    : "Compatibility no-op; no longer required for sandbox mutations";
 }
 
 main().catch((error: unknown) => {

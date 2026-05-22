@@ -1,5 +1,6 @@
 import { envConfig, type SaleorEnvConfig } from "./config.js";
 import { UserError } from "./errors.js";
+import { assertOnlyQueries } from "./graphql.js";
 import type { EnvName } from "./types.js";
 
 export type GraphqlResponse = {
@@ -21,6 +22,10 @@ export async function requestGraphqlWithConfig(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<GraphqlResponse> {
+  if (config.name === "prod") {
+    assertOnlyQueries(query);
+  }
+
   const headers: Record<string, string> = {
     "content-type": "application/json",
   };
