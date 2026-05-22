@@ -1,26 +1,25 @@
-import assert from "node:assert/strict";
-import test from "node:test";
+import { afterEach, expect, test, vi } from "vitest";
 import { requestGraphql } from "../src/client.js";
 
 const originalFetch = globalThis.fetch;
 const originalProdUrl = process.env.SALEOR_PROD_API_URL;
 const originalSandboxUrl = process.env.SALEOR_SANDBOX_API_URL;
 
-test.afterEach(() => {
+afterEach(() => {
   globalThis.fetch = originalFetch;
   restoreEnv("SALEOR_PROD_API_URL", originalProdUrl);
   restoreEnv("SALEOR_SANDBOX_API_URL", originalSandboxUrl);
+  vi.restoreAllMocks();
 });
 
 test("prod mutations are rejected before fetch", async () => {
-  let fetchCalled = false;
   process.env.SALEOR_PROD_API_URL = "https://prod.example.com/graphql/";
-  globalThis.fetch = async () => {
-    fetchCalled = true;
+  const fetchMock = vi.fn(async () => {
     throw new Error("fetch should not be called");
-  };
+  });
+  globalThis.fetch = fetchMock;
 
-  await assert.rejects(
+  await expect(
     requestGraphql(
       "prod",
       `mutation UpdateOrder {
@@ -31,20 +30,18 @@ test("prod mutations are rejected before fetch", async () => {
         }
       }`,
     ),
-    /Prod execution is query-only\. Refused operation type\(s\): mutation/,
-  );
-  assert.equal(fetchCalled, false);
+  ).rejects.toThrow(/Prod execution is query-only\. Refused operation type\(s\): mutation/);
+  expect(fetchMock).not.toHaveBeenCalled();
 });
 
 test("prod subscriptions are rejected before fetch", async () => {
-  let fetchCalled = false;
   process.env.SALEOR_PROD_API_URL = "https://prod.example.com/graphql/";
-  globalThis.fetch = async () => {
-    fetchCalled = true;
+  const fetchMock = vi.fn(async () => {
     throw new Error("fetch should not be called");
-  };
+  });
+  globalThis.fetch = fetchMock;
 
-  await assert.rejects(
+  await expect(
     requestGraphql(
       "prod",
       `subscription OrderEvents {
@@ -57,20 +54,18 @@ test("prod subscriptions are rejected before fetch", async () => {
         }
       }`,
     ),
-    /Prod execution is query-only\. Refused operation type\(s\): subscription/,
-  );
-  assert.equal(fetchCalled, false);
+  ).rejects.toThrow(/Prod execution is query-only\. Refused operation type\(s\): subscription/);
+  expect(fetchMock).not.toHaveBeenCalled();
 });
 
 test("prod queries still execute through fetch", async () => {
-  let fetchCalled = false;
   process.env.SALEOR_PROD_API_URL = "https://prod.example.com/graphql/";
-  globalThis.fetch = async (input, init) => {
-    fetchCalled = true;
-    assert.equal(input, "https://prod.example.com/graphql/");
-    assert.equal(init?.method, "POST");
+  const fetchMock = vi.fn(async (input, init) => {
+    expect(input).toBe("https://prod.example.com/graphql/");
+    expect(init?.method).toBe("POST");
     return jsonResponse({ data: { shop: { name: "Demo" } } });
-  };
+  });
+  globalThis.fetch = fetchMock;
 
   const response = await requestGraphql(
     "prod",
@@ -81,19 +76,18 @@ test("prod queries still execute through fetch", async () => {
     }`,
   );
 
-  assert.deepEqual(response, { data: { shop: { name: "Demo" } } });
-  assert.equal(fetchCalled, true);
+  expect(response).toEqual({ data: { shop: { name: "Demo" } } });
+  expect(fetchMock).toHaveBeenCalledOnce();
 });
 
 test("sandbox mutations execute through fetch", async () => {
-  let fetchCalled = false;
   process.env.SALEOR_SANDBOX_API_URL = "https://sandbox.example.com/graphql/";
-  globalThis.fetch = async (input, init) => {
-    fetchCalled = true;
-    assert.equal(input, "https://sandbox.example.com/graphql/");
-    assert.equal(init?.method, "POST");
+  const fetchMock = vi.fn(async (input, init) => {
+    expect(input).toBe("https://sandbox.example.com/graphql/");
+    expect(init?.method).toBe("POST");
     return jsonResponse({ data: { orderUpdate: { order: { id: "T3JkZXI6MQ==" } } } });
-  };
+  });
+  globalThis.fetch = fetchMock;
 
   const response = await requestGraphql(
     "sandbox",
@@ -106,8 +100,8 @@ test("sandbox mutations execute through fetch", async () => {
     }`,
   );
 
-  assert.deepEqual(response, { data: { orderUpdate: { order: { id: "T3JkZXI6MQ==" } } } });
-  assert.equal(fetchCalled, true);
+  expect(response).toEqual({ data: { orderUpdate: { order: { id: "T3JkZXI6MQ==" } } } });
+  expect(fetchMock).toHaveBeenCalledOnce();
 });
 
 function jsonResponse(body: unknown): Response {
