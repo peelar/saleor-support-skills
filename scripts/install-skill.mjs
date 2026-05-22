@@ -329,11 +329,11 @@ function printHelp() {
   console.log(`Install the support-agent skills for coding agents.
 
 Usage:
-  pnpm skill:install
   pnpm bootstrap
   pnpm bootstrap -- --agent claude-code
   pnpm bootstrap -- --agent codex,claude-code,gemini-cli
   pnpm bootstrap -- --agent all --force
+  pnpm skill:install
 
 Options:
   -a, --agent <name>   Agent to install for. Repeat or comma-separate values.
@@ -344,8 +344,8 @@ Options:
   --force              Replace existing files.
 
 Defaults:
-  pnpm skill:install   installs Codex globally, preserving the original behavior.
   pnpm bootstrap       opens an interactive agent picker and installs into this project.
+  pnpm skill:install   installs Codex globally, preserving the original behavior.
 `);
 }
 

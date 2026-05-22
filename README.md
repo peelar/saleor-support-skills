@@ -1,22 +1,48 @@
-# Saleor Support Agent Harness
+# Saleor Support Agent
 
 Local CLI plus installable coding-agent skills for API-only Saleor support investigations.
 
 ## Purpose
 
-This tool gives support agents a repeatable, file-backed workflow for investigating Saleor API bug reports. It starts a case directory, records the intake, keeps customer/prod GraphQL access read-only, gives the agent safe commands for schema/query/mutation work, and collects the evidence needed for a final root-cause report.
+This tool helps support agents investigate Saleor API bug reports in a consistent way. It keeps customer data safe, separates read-only production checks from sandbox testing, and helps collect the evidence needed to explain what happened.
 
-It solves the common support problem where an investigation spans customer data, sandbox reproduction, Saleor source/docs research, draft fixes, and final reporting. Instead of scattering that work across chat history and ad hoc commands, the harness keeps it under `cases/<case-id>/` with explicit safety boundaries.
+It is meant for investigations that require more than a quick answer: checking customer data, reproducing behavior safely, reading Saleor docs and source code to confirm behavior, and preparing a clear final report.
 
 ## Run It
 
-Install dependencies and configure endpoints:
+### Initial Setup
+
+Install dependencies:
 
 ```bash
 pnpm install
-cp .env.example .env
-pnpm dev start
 ```
+
+Install project-local agent files for a specific coding agent:
+
+```bash
+pnpm bootstrap
+```
+
+Configure the endpoint URLs used by the agent commands and create a case:
+
+```bash
+cp .env.example .env
+pnpm dev new
+```
+
+### Prod vs. Sandbox
+
+Support Agent harness distinguishes between `prod` and `sandbox` environments.
+
+`prod` is where the issue was found. The agent can't execute mutations on `prod`; it can at best write a draft of them and present to the user. It can query resources according to the token permissions.
+
+`sandbox` is where the agent tries to reproduce the issue. It's meant to be a safe dev instance (e.g., an empty Cloud sandbox) where the agent can perform mutations freely. Allowed operations are scoped by token permissions as well as the harness permissions.
+
+> [!TIP]
+> I recommend whitelisting the term `pnpm sandbox` so you are not asked for permission anytime the agent tries to do something in the sandbox.
+
+### Usage
 
 Use the agent-first flow for real investigations:
 
@@ -24,26 +50,12 @@ Use the agent-first flow for real investigations:
 Use $investigate to investigate this Saleor API bug report: <paste customer report>
 ```
 
-For manual CLI use:
+The agent will then:
 
-```bash
-pnpm dev
-pnpm dev status
-pnpm prod schema pull
-pnpm sandbox mutation run cases/<case-id>/sandbox/mutations/reproduce.graphql
-```
+1. Start a case
+2. Investigate the issue on the `prod` environment
+3. Recreate it on the `sandbox` environment
+4. Read docs or source code to find the root cause (or write a PR to docs if found behavior doesn't match them)
+5. Produce a root-cause report
 
-The CLI help output is the source of truth for command syntax:
-
-```bash
-pnpm dev help
-pnpm prod help
-pnpm sandbox help
-```
-
-## Docs
-
-- [Agent setup](docs/AGENT-SETUP.md) explains the installable skills and project-local agent files.
-- [CLI reference](docs/CLI-REFERENCE.md) lists the manual commands and generated case layout.
-- [Safety model](docs/SAFETY-MODEL.md) documents the prod/sandbox rules and GraphQL execution boundaries.
-- [Development](docs/DEVELOPMENT.md) covers local checks, watch mode, and commit hooks.
+To communicate with Saleor GraphQL API, the agent will use a CLI. It encapsulates the query/mutation logic as well as the different set of rules for operating on `prod` and `sandbox` environments. It's not meant to be used by the user, just the agent.

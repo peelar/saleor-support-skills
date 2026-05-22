@@ -1,7 +1,7 @@
 # Safety Model
 
 - `prod` and `sandbox` are separate GraphQL endpoints with separate tokens.
-- Prod network execution is query-only. The CLI parses GraphQL documents and refuses mutations/subscriptions before making a request.
+- Prod network execution is query-only. The CLI and the shared GraphQL network client parse GraphQL documents and refuse mutations/subscriptions before making a request.
 - Prod mutation commands only create `.graphql` draft files.
 - Prod mutation runs inspect the file locally and save an inspection artifact, but never make a network request.
 - Sandbox mutations execute through `pnpm sandbox mutation run ...`; `--execute` is accepted only as a compatibility no-op.

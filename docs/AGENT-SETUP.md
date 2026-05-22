@@ -33,16 +33,16 @@ skills/investigation-wrap-up/
 
 To use them in an agent that supports local skills, install or point the agent at `skills/`, then invoke `$investigate` with the bug report as input. The wrap-up skill triggers when an investigation is done or the user asks to write the final report.
 
-For the original Codex global install:
+For the one-time project setup:
 
 ```bash
-pnpm skill:install
+pnpm bootstrap
 ```
 
 If an older local copy exists:
 
 ```bash
-pnpm skill:install -- --force
+pnpm bootstrap -- --force
 ```
 
 ## Project-Local Setup
@@ -50,21 +50,21 @@ pnpm skill:install -- --force
 Initialize project-local agent files for a specific coding agent:
 
 ```bash
-pnpm skill:init
-pnpm skill:init -- --agent claude-code
-pnpm skill:init -- --agent codex
-pnpm skill:init -- --agent gemini-cli
-pnpm skill:init -- --agent cursor
+pnpm bootstrap
+pnpm bootstrap -- --agent claude-code
+pnpm bootstrap -- --agent codex
+pnpm bootstrap -- --agent gemini-cli
+pnpm bootstrap -- --agent cursor
 ```
 
 Multiple agents can be installed at once:
 
 ```bash
-pnpm skill:init -- --agent codex,claude-code,gemini-cli
-pnpm skill:init -- --agent all --force
+pnpm bootstrap -- --agent codex,claude-code,gemini-cli
+pnpm bootstrap -- --agent all --force
 ```
 
-Running `pnpm skill:init` without `--agent` installs project-local Codex skills.
+Running `pnpm bootstrap` without `--agent` opens an interactive agent picker and installs project-local skills. Pass `--agent codex` for a non-interactive Codex-only setup.
 
 Supported keys are `codex`, `claude-code`, `gemini-cli`, `windsurf`, `cursor`, `github-copilot`, `cline`, and `universal`.
 
