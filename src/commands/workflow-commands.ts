@@ -2,7 +2,7 @@ import path from "node:path";
 import { caseStatus, generateCaseId, initCase, refreshCase, requireCaseId } from "../cases.js";
 import { configureSaleorApiEnvVars } from "./start-command.js";
 
-export async function startWorkflow(caseId?: string): Promise<void> {
+export async function newWorkflow(caseId?: string): Promise<void> {
   await configureSaleorApiEnvVars();
   await startCase(caseId);
 }

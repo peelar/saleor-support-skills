@@ -17,9 +17,6 @@ const saleorApiUrlInputLabels: Record<SaleorApiUrlEnvVar, string> = {
   SALEOR_SANDBOX_API_URL: "Sandbox Saleor GraphQL endpoint URL",
 };
 
-const saleorApiUrlSetupExplanation =
-  "This setup asks for the customer/prod and sandbox Saleor GraphQL endpoint URLs. They are saved in .env so later prod and sandbox commands know which environments to use.";
-
 export async function configureSaleorApiEnvVars(): Promise<void> {
   const values: EnvValueMap = {};
   const invalidMessages: string[] = [];
@@ -45,18 +42,13 @@ export async function configureSaleorApiEnvVars(): Promise<void> {
   if (!input.isTTY || !output.isTTY) {
     if (invalidMessages.length > 0) {
       throw new UserError(
-        `${saleorApiUrlSetupExplanation}\n\nCannot prompt for Saleor endpoint configuration in a non-interactive shell:\n${invalidMessages
+        `Cannot prompt for Saleor endpoint configuration in a non-interactive shell:\n${invalidMessages
           .map((message) => `- ${message}`)
           .join("\n")}`,
       );
     }
     console.log("Saleor endpoint URLs are valid.");
     return;
-  }
-
-  if (invalidMessages.length > 0) {
-    console.log(saleorApiUrlSetupExplanation);
-    console.log("");
   }
 
   const promptedValues = await promptForMissingOrInvalidValues(values);

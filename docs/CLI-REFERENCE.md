@@ -32,12 +32,12 @@ SALEOR_SOURCE_DIR=/Users/adrianpilarczyk/Code/saleor/saleor
 SALEOR_DOCS_DIR=/Users/adrianpilarczyk/Code/saleor/saleor-docs
 ```
 
-Endpoint URLs must point at Saleor GraphQL endpoints and include `/graphql/`.
+Endpoint URLs must point at Saleor GraphQL endpoints and include `/graphql/`. This is setup for the coding agent's support-agent commands, not Saleor app configuration.
 
-To configure or validate the endpoint URLs interactively:
+To configure or validate the coding-agent endpoint URLs interactively:
 
 ```bash
-pnpm dev start
+pnpm dev new
 ```
 
 ## Case Commands

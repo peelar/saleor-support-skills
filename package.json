@@ -10,6 +10,7 @@
     "agent:watch": "concurrently -n tsc,knip -c blue,magenta \"tsc -p tsconfig.json --noEmit --watch --preserveWatchOutput\" \"knip --watch --include-entry-exports --no-config-hints\"",
     "audit:all": "pnpm check && pnpm audit:unused",
     "audit:unused": "knip --include-entry-exports --no-config-hints && knip --strict --include-entry-exports --no-config-hints",
+    "bootstrap": "node scripts/install-skill.mjs",
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "dev": "tsx src/cli.ts",
@@ -17,7 +18,6 @@
     "prod": "tsx src/cli.ts prod",
     "sandbox": "tsx src/cli.ts sandbox",
     "skill:install": "node scripts/install-skill.mjs",
-    "skill:init": "node scripts/install-skill.mjs --project",
     "start": "node dist/cli.js"
   },
   "dependencies": {

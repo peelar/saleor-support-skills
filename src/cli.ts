@@ -22,7 +22,7 @@ import {
   sourceReadCommand,
   sourceSearchCommand,
 } from "./commands/researchCommands.js";
-import { refreshWorkflow, startCase, startWorkflow, statusWorkflow } from "./commands/workflow-commands.js";
+import { newWorkflow, refreshWorkflow, startCase, statusWorkflow } from "./commands/workflow-commands.js";
 import { parseEnvName } from "./config.js";
 import { UserError } from "./errors.js";
 import type { EnvName } from "./types.js";
@@ -70,7 +70,9 @@ function buildRootCli(): CAC {
 
   registerHelp(cli);
 
-  cli.command("start [caseId]", "Configure Saleor endpoints, then start a new case").action((caseId?: string) => run(startWorkflow, caseId));
+  cli
+    .command("new [caseId]", "Configure endpoint URLs for coding-agent CLI commands, then create a new case")
+    .action((caseId?: string) => run(newWorkflow, caseId));
   cli.command("status [caseId]", "Show current or named case status").action((caseId?: string) => run(statusWorkflow, caseId));
   cli.command("refresh [caseId]", "Regenerate setup markdown for current or named case").action((caseId?: string) => run(refreshWorkflow, caseId));
 
