@@ -5,7 +5,7 @@ import path from "node:path";
 import readline from "node:readline";
 
 const root = process.cwd();
-const skillNames = ["investigate", "investigation-wrap-up"];
+const skillNames = ["investigate"];
 
 const defaultScope = process.env.npm_lifecycle_event === "bootstrap" ? "project" : "global";
 
@@ -112,7 +112,7 @@ async function main() {
     installed.push(...(await installAdapterAgent(agentName, agent, scope)));
   }
 
-  console.log(`Installed investigation skills for ${installed.length} target${installed.length === 1 ? "" : "s"}:`);
+  console.log(`Installed the investigation skill for ${installed.length} target${installed.length === 1 ? "" : "s"}:`);
   for (const item of installed) {
     console.log(`- ${item}`);
   }
@@ -326,7 +326,7 @@ When the user asks to investigate a Saleor API issue, read and follow \`skills/i
 }
 
 function printHelp() {
-  console.log(`Install the Saleor API investigation skills for coding agents.
+  console.log(`Install the Saleor API investigation skill for coding agents.
 
 Usage:
   pnpm bootstrap

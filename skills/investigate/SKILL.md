@@ -1,13 +1,13 @@
 ---
 name: investigate
-description: Use this skill when investigating Saleor API issues, especially GraphQL behavior involving orders, checkout, products, variants, users, customers, channels, shipping, tax, permissions, or plugins. The skill starts and manages a local case, uses its bundled CLI for Saleor schema/docs/source/query/mutation work, keeps prod/live read-only, and performs writes only in sandbox.
+description: Use this skill when investigating or wrapping up Saleor API issues, especially GraphQL behavior involving orders, checkout, products, variants, users, customers, channels, shipping, tax, permissions, or plugins. It starts, resumes, validates, and reports on local cases; uses its bundled CLI for Saleor schema/docs/source/query/mutation work; keeps prod/live read-only; and performs writes only in sandbox. Also use when the user says an investigation is done, asks to finish or close it, or requests the final report.
 ---
 
 # Investigate Saleor API Issue
 
-The user's prompt is the issue intake. Do not ask for a case ID. Start a case, record the intake, investigate with the CLI, and produce a root-cause report.
+Handle the whole investigation lifecycle, including final reporting.
 
-## Start
+## Locate the CLI
 
 Locate the directory containing this `SKILL.md`. The bundled CLI is:
 
@@ -20,6 +20,16 @@ inside the repository being investigated. The CLI uses the Git root by default
 and keeps config, state, schemas, and cases under `.saleor-investigate/`. Set
 `SALEOR_INVESTIGATE_DIR` only when the user wants a different root. Do not look
 for a separate CLI repository.
+
+## Choose the Workflow
+
+- For a new issue report, follow **Start a New Investigation**.
+- When the user says the investigation is done, asks to finish or close it, or
+  requests the final report, follow **Wrap Up an Investigation**.
+
+## Start a New Investigation
+
+The user's prompt is the issue intake. Do not ask for a case ID.
 
 First run:
 
@@ -112,6 +122,54 @@ Prefer env-first commands for live GraphQL/schema work:
 12. Finish by updating `<case-dir>/REPORT.md`.
 
 For common controlled checkout/product/voucher setup, read `references/SANDBOX-FIXTURES.md` and keep generated GraphQL files in the active case.
+
+## Wrap Up an Investigation
+
+Do not create a new case or require live API configuration just to wrap up
+existing work.
+
+1. Run `<CLI> status` to identify the active case. If there is no active case,
+   inspect `.saleor-investigate/cases/` and ask the user only when more than one
+   case could be active.
+2. Read `INFO.md`, `INVESTIGATION.md`, `FINDINGS.md`, `REPORT.md`,
+   `artifact-index.json` if present, and `manifest.json`.
+3. Check that Markdown files use uppercase base names and config/state files
+   use kebab-case lowercase names.
+4. Ensure every confirmed finding cites an artifact path or source path.
+5. Ensure every unresolved permission blocker names the environment, GraphQL
+   path, required permission or scope, and denial artifact.
+6. Preserve exact links for PRs, docs proposals, or issues opened during the
+   investigation.
+7. Keep shared text safe: omit secrets, full live promo codes, and unnecessary
+   PII. Link raw artifacts when authorized users need exact values.
+8. Write `REPORT.md`. Prefer artifact paths and outcomes over command
+   transcripts.
+
+Use these report sections unless the case clearly needs less:
+
+```md
+# <case-id> Report
+
+## Summary
+
+## Reproduction
+
+## Evidence
+
+## Root Cause
+
+## Operator-Safe Next Steps
+
+## Upstream Follow-Up
+
+## Remaining Blockers
+
+## Docs Gap
+```
+
+Omit `Remaining Blockers` when there are none. If the harness blocked part of
+the investigation, preserve that limitation as an optional upstream follow-up.
+Do not change the harness while wrapping up a case.
 
 ## Final Response
 

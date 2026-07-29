@@ -1,7 +1,0 @@
-interface:
-  display_name: "Wrap Up Investigation"
-  short_description: "Finalize a Saleor API case report"
-  default_prompt: "Wrap up this Saleor API investigation and write the report."
-
-policy:
-  allow_implicit_invocation: true

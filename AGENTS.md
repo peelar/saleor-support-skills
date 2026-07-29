@@ -1,6 +1,6 @@
 # Agent Instructions
 
-This repo is a local Saleor API investigation harness. The installable skills are `skills/investigate/SKILL.md` and `skills/investigation-wrap-up/SKILL.md`.
+This repo is a local Saleor API investigation harness. The installable skill is `skills/investigate/SKILL.md`.
 
 Normal use is agent-first: invoke `$investigate` with the issue report as input. The skill starts a case with `pnpm dev`, writes the intake into the case files, and uses the CLI as its safe tool layer.
 
