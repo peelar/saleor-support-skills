@@ -47,7 +47,7 @@ const adapterAgents = {
     globalSkillDirs: [[".cursor", "skills"]],
     adapters: [
       {
-        pathParts: [".cursor", "rules", "saleor-support-agent.mdc"],
+        pathParts: [".cursor", "rules", "saleor-api-investigator.mdc"],
         content: cursorRule(),
       },
     ],
@@ -58,7 +58,7 @@ const adapterAgents = {
     globalSkillDirs: [[".copilot", "skills"]],
     adapters: [
       {
-        pathParts: [".github", "instructions", "saleor-support-agent.instructions.md"],
+        pathParts: [".github", "instructions", "saleor-api-investigator.instructions.md"],
         content: copilotInstructions(),
       },
     ],
@@ -69,7 +69,7 @@ const adapterAgents = {
     globalSkillDirs: [[".agents", "skills"]],
     adapters: [
       {
-        pathParts: [".clinerules", "saleor-support-agent.md"],
+        pathParts: [".clinerules", "saleor-api-investigator.md"],
         content: clineRule(),
       },
     ],
@@ -112,7 +112,7 @@ async function main() {
     installed.push(...(await installAdapterAgent(agentName, agent, scope)));
   }
 
-  console.log(`Installed support skills for ${installed.length} target${installed.length === 1 ? "" : "s"}:`);
+  console.log(`Installed investigation skills for ${installed.length} target${installed.length === 1 ? "" : "s"}:`);
   for (const item of installed) {
     console.log(`- ${item}`);
   }
@@ -284,19 +284,19 @@ function expandAgents(agents) {
 
 function cursorRule() {
   return `---
-description: Saleor API support investigation workflow for customer bug reports.
+description: Saleor API investigation workflow.
 alwaysApply: false
 ---
 
-# Saleor Support Investigation
+# Saleor API Investigation
 
-When the user asks to investigate a Saleor API customer bug report, read and follow \`skills/investigate/SKILL.md\`.
+When the user asks to investigate a Saleor API issue, read and follow \`skills/investigate/SKILL.md\`.
 
 Hard rules:
-- Customer/prod GraphQL is read-only.
+- Prod/live GraphQL is read-only.
 - Never execute mutations or subscriptions against prod.
 - Use \`pnpm sandbox ...\` for sandbox writes.
-- Keep \`SALEOR_*\` endpoint URLs and tokens in \`.env\`.
+- Keep \`SALEOR_*\` endpoint URLs and tokens in \`.saleor-investigate/config.env\`.
 `;
 }
 
@@ -305,28 +305,28 @@ function copilotInstructions() {
 applyTo: "**"
 ---
 
-# Saleor Support Investigation
+# Saleor API Investigation
 
-When working on Saleor API support investigations in this repository, read and follow \`skills/investigate/SKILL.md\`.
+When working on Saleor API investigations in this repository, read and follow \`skills/investigate/SKILL.md\`.
 
-Customer/prod GraphQL is read-only. Never execute mutations or subscriptions against prod. Use \`pnpm sandbox ...\` for sandbox writes.
+Prod/live GraphQL is read-only. Never execute mutations or subscriptions against prod. Use \`pnpm sandbox ...\` for sandbox writes.
 `;
 }
 
 function clineRule() {
-  return `# Saleor Support Investigation
+  return `# Saleor API Investigation
 
-When the user asks to investigate a Saleor API customer bug report, read and follow \`skills/investigate/SKILL.md\`.
+When the user asks to investigate a Saleor API issue, read and follow \`skills/investigate/SKILL.md\`.
 
-- Customer/prod GraphQL is read-only.
+- Prod/live GraphQL is read-only.
 - Never execute mutations or subscriptions against prod.
 - Use \`pnpm sandbox ...\` for sandbox writes.
-- Keep \`SALEOR_*\` endpoint URLs and tokens in \`.env\`.
+- Keep \`SALEOR_*\` endpoint URLs and tokens in \`.saleor-investigate/config.env\`.
 `;
 }
 
 function printHelp() {
-  console.log(`Install the support-agent skills for coding agents.
+  console.log(`Install the Saleor API investigation skills for coding agents.
 
 Usage:
   pnpm bootstrap

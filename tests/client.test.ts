@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { requestGraphql } from "../src/client.js";
+import { requestGraphql, requestGraphqlWithConfig } from "../src/client.js";
 
 const originalFetch = globalThis.fetch;
 const originalProdUrl = process.env.SALEOR_PROD_API_URL;
@@ -104,9 +104,51 @@ test("sandbox mutations execute through fetch", async () => {
   expect(fetchMock).toHaveBeenCalledOnce();
 });
 
-function jsonResponse(body: unknown): Response {
+test("HTTP GraphQL errors are rejected by default", async () => {
+  const fetchMock = vi.fn(async () =>
+    jsonResponse(
+      {
+        errors: [{ message: "Unsupported introspection field" }],
+      },
+      400,
+    ),
+  );
+  globalThis.fetch = fetchMock;
+
+  await expect(
+    requestGraphqlWithConfig(
+      {
+        name: "sandbox",
+        apiUrl: "https://sandbox.example.com/graphql/",
+      },
+      "query Introspection { __schema { queryType { name } } }",
+    ),
+  ).rejects.toThrow(/GraphQL request failed with HTTP 400/);
+});
+
+test("HTTP GraphQL error responses can be inspected for compatibility fallback", async () => {
+  const body = {
+    errors: [{ message: 'Cannot query field "description" on type "__Schema".' }],
+  };
+  const fetchMock = vi.fn(async () => jsonResponse(body, 400));
+  globalThis.fetch = fetchMock;
+
+  const response = await requestGraphqlWithConfig(
+    {
+      name: "sandbox",
+      apiUrl: "https://sandbox.example.com/graphql/",
+    },
+    "query Introspection { __schema { description } }",
+    undefined,
+    { acceptGraphqlErrorResponse: true },
+  );
+
+  expect(response).toEqual(body);
+});
+
+function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
-    status: 200,
+    status,
     headers: { "content-type": "application/json" },
   });
 }

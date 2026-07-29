@@ -1,61 +1,81 @@
-# Saleor Support Agent
+# Saleor API Investigator
 
-Local CLI plus installable coding-agent skills for API-only Saleor support investigations.
+Two coding-agent skills for investigating Saleor API issues. The main skill
+includes its own CLI, so users do not need to clone this repository or install
+its development dependencies.
 
-## Purpose
+This project is for people who operate or support Saleor environments they are
+authorized to access. It keeps the live environment read-only, uses a sandbox
+for reproduction, and saves the evidence behind each conclusion.
 
-This tool helps support agents investigate Saleor API bug reports in a consistent way. It keeps customer data safe, separates read-only production checks from sandbox testing, and helps collect the evidence needed to explain what happened.
+## Install
 
-It is meant for investigations that require more than a quick answer: checking customer data, reproducing behavior safely, reading Saleor docs and source code to confirm behavior, and preparing a clear final report.
+```bash
+npx skills add saleor/support-agent \
+  --skill investigate \
+  --skill investigation-wrap-up
+```
 
-## Run It
+The installer copies only the selected skill directories. The `investigate`
+skill carries a compiled CLI under `scripts/`. Node.js 20 or newer is the only
+runtime requirement.
 
-### Initial Setup
+A local Saleor Core checkout is required. The skill checks its path before
+starting an investigation. A local docs checkout is optional.
 
-Install dependencies:
+## Investigate an issue
+
+Open your coding agent anywhere inside the repository where you want to run the
+investigation. Then use:
+
+```text
+Use $investigate to investigate this Saleor API issue: <paste issue report>
+```
+
+The agent will:
+
+1. Start a case.
+2. Inspect the live environment with read-only GraphQL queries.
+3. Reproduce writes in the sandbox when needed.
+4. Check the schema, Saleor source, and docs.
+5. Produce an evidence-backed report.
+
+The CLI keeps config, state, schemas, and cases under `.saleor-investigate/` at
+the Git root. It adds that directory to Git's local exclude file without
+changing the repository's tracked `.gitignore`.
+
+## Safety boundary
+
+- `prod` means the live environment where the issue happened. Queries are
+  allowed. Mutations and subscriptions are rejected before any network request.
+- `sandbox` is an isolated environment used for reproduction. Mutations are
+  allowed within the configured token permissions.
+- Keep endpoints and tokens in `.saleor-investigate/config.env`.
+- Never commit case files, API responses, tokens, or unnecessary personal data.
+- The tool can draft an upstream docs proposal, but it never edits another
+  repository.
+
+The skill uses separate `sandbox` and `prod` CLI prefixes. Sandbox commands may
+be whitelisted. Keep prod commands approval-gated.
+
+See [CLI reference](docs/CLI-REFERENCE.md), [agent setup](docs/AGENT-SETUP.md),
+and the full [safety model](docs/SAFETY-MODEL.md).
+
+## Development
 
 ```bash
 pnpm install
+mkdir -p .saleor-investigate
+cp config.example.env .saleor-investigate/config.env
+pnpm hooks:install
+pnpm agent:watch
+pnpm audit:all
 ```
 
-Install project-local agent files for a specific coding agent:
+Build the CLI carried by the skill with:
 
 ```bash
-pnpm bootstrap
+pnpm build:skill-cli
 ```
 
-Configure the endpoint URLs used by the agent commands and create a case:
-
-```bash
-cp .env.example .env
-pnpm dev new
-```
-
-### Prod vs. Sandbox
-
-Support Agent harness distinguishes between `prod` and `sandbox` environments.
-
-`prod` is where the issue was found. The agent can't execute mutations on `prod`; it can at best write a draft of them and present to the user. It can query resources according to the token permissions.
-
-`sandbox` is where the agent tries to reproduce the issue. It's meant to be a safe dev instance (e.g., an empty Cloud sandbox) where the agent can perform mutations freely. Allowed operations are scoped by token permissions as well as the harness permissions.
-
-> [!TIP]
-> I recommend whitelisting the term `pnpm sandbox` so you are not asked for permission anytime the agent tries to do something in the sandbox.
-
-### Usage
-
-Use the agent-first flow for real investigations:
-
-```text
-Use $investigate to investigate this Saleor API bug report: <paste customer report>
-```
-
-The agent will then:
-
-1. Start a case
-2. Investigate the issue on the `prod` environment
-3. Recreate it on the `sandbox` environment
-4. Read docs or source code to find the root cause (or write a PR to docs if found behavior doesn't match them)
-5. Produce a root-cause report
-
-To communicate with Saleor GraphQL API, the agent will use a CLI. It encapsulates the query/mutation logic as well as the different set of rules for operating on `prod` and `sandbox` environments. It's not meant to be used by the user, just the agent.
+`pnpm audit:all` checks that the committed bundle matches the TypeScript source.

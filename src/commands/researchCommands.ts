@@ -8,7 +8,7 @@ import { caseDir, readText, writeText } from "../fs.js";
 export async function sourceSearchCommand(term: string): Promise<void> {
   const config = appConfig();
   if (!config.sourceDir) {
-    throw new UserError("Missing SALEOR_SOURCE_DIR in environment or .env");
+    throw new UserError("Missing SALEOR_SOURCE_DIR in environment or .saleor-investigate/config.env");
   }
   await searchRepository(config.sourceDir, term);
 }
@@ -16,7 +16,7 @@ export async function sourceSearchCommand(term: string): Promise<void> {
 export async function sourceReadCommand(relativePath: string, start?: string, count?: string): Promise<void> {
   const config = appConfig();
   if (!config.sourceDir) {
-    throw new UserError("Missing SALEOR_SOURCE_DIR in environment or .env");
+    throw new UserError("Missing SALEOR_SOURCE_DIR in environment or .saleor-investigate/config.env");
   }
   await readRepositoryFile(config.sourceDir, relativePath, start, count);
 }
@@ -24,7 +24,7 @@ export async function sourceReadCommand(relativePath: string, start?: string, co
 export async function docsSearchCommand(term: string): Promise<void> {
   const config = appConfig();
   if (!config.docsDir) {
-    throw new UserError("Missing SALEOR_DOCS_DIR in environment or .env");
+    throw new UserError("Missing SALEOR_DOCS_DIR in environment or .saleor-investigate/config.env");
   }
   await searchRepository(config.docsDir, term);
 }
@@ -32,7 +32,7 @@ export async function docsSearchCommand(term: string): Promise<void> {
 export async function docsReadCommand(relativePath: string, start?: string, count?: string): Promise<void> {
   const config = appConfig();
   if (!config.docsDir) {
-    throw new UserError("Missing SALEOR_DOCS_DIR in environment or .env");
+    throw new UserError("Missing SALEOR_DOCS_DIR in environment or .saleor-investigate/config.env");
   }
   await readRepositoryFile(config.docsDir, relativePath, start, count);
 }
@@ -48,7 +48,7 @@ export async function docsPatchProposalCommand(caseId: string | undefined, title
 }
 
 async function searchRepository(root: string, term: string): Promise<void> {
-  await run("rg", ["--line-number", "--context", "2", term, root], process.cwd(), true);
+  await run("rg", ["--line-number", "--context", "2", term, root], appConfig().cwd, true);
 }
 
 async function readRepositoryFile(root: string, relativePath: string, startValue?: string, countValue?: string): Promise<void> {

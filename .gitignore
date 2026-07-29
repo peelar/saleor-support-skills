@@ -1,6 +1,10 @@
 node_modules/
 dist/
+.output/
+.vercel/
+apps/support-agent-web/
 .env
+.saleor-investigate/
 .support-agent/
 .firecrawl/
 cases/

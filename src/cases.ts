@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import { appConfig } from "./config.js";
 import { UserError } from "./errors.js";
 import { caseDir, currentCasePath, ensureDir, pathExists, readJson, timestampSlug, writeJson, writeText, writeTextIfMissing } from "./fs.js";
+import { cliInvocation } from "./invocation.js";
 
 export type CaseStatus = {
   caseId: string;
@@ -57,7 +58,7 @@ export async function initCase(caseId: string): Promise<string> {
   await writeTextIfMissing(path.join(root, "FINDINGS.md"), findingsTemplate(caseId));
   await writeTextIfMissing(
     path.join(root, "NOTES.md"),
-    `# ${caseId}\n\n## Customer Report\n\n## Observations\n\n## Hypotheses\n\n## Evidence\n\n`,
+    `# ${caseId}\n\n## Issue Report\n\n## Observations\n\n## Hypotheses\n\n## Evidence\n\n`,
   );
   await writeTextIfMissing(path.join(root, "REPORT.md"), reportTemplate(caseId));
   await setCurrentCase(caseId);
@@ -129,7 +130,7 @@ export async function currentCaseId(): Promise<string | undefined> {
 export async function requireCaseId(explicitCaseId?: string): Promise<string> {
   const caseId = explicitCaseId ?? (await currentCaseId());
   if (!caseId) {
-    throw new UserError("No current case. Run `pnpm dev` first, or pass --case <CASE-ID>.");
+    throw new UserError(`No current case. Run \`${cliInvocation()}\` first, or pass --case <CASE-ID>.`);
   }
   return caseId;
 }
@@ -181,17 +182,18 @@ async function countFiles(dir: string, options: { excludeSuffix?: string } = {})
 
 function setupTemplate(caseId: string): string {
   const config = appConfig();
+  const cli = cliInvocation();
   return `# ${caseId} Setup
 
-This file is the case runbook. The canonical agent workflow is \`skills/investigate/SKILL.md\`. Use this case directory as durable state.
+This file is the case runbook. The installed \`investigate\` skill is the canonical workflow. Use this case directory as durable state.
 
 ## Scope
 
 - Investigate Saleor API behavior only.
-- Use customer/prod only for read-only GraphQL queries.
+- Use prod/live only for read-only GraphQL queries.
 - Never execute a mutation or subscription against prod.
 - For write reproduction, draft the prod mutation as an example and perform the write only in sandbox.
-- Keep customer data minimal in files. Prefer IDs and redacted snippets over full records.
+- Keep live data minimal in files. Prefer IDs and redacted snippets over full records.
 
 ## Configured Inputs
 
@@ -203,12 +205,12 @@ This file is the case runbook. The canonical agent workflow is \`skills/investig
 ## Required First Pass
 
 1. Fill \`INFO.md\` with a short case-specific brief.
-2. Run \`pnpm dev help\` and topic help before using CLI tools. CLI help is the command syntax source of truth.
+2. Run \`${cli} help\` and topic help before using CLI tools. CLI help is the command syntax source of truth.
 3. Pull schemas if missing or stale.
 4. Search docs and source before writing GraphQL.
 5. Create focused prod query files under \`prod/queries/\`.
 6. Execute only query operations against prod.
-7. If a write is needed, create sandbox mutation files under \`sandbox/mutations/\` and run them with \`pnpm sandbox mutation run <file>\`.
+7. If a write is needed, create sandbox mutation files under \`sandbox/mutations/\` and run them with \`${cli} sandbox mutation run <file>\`.
 8. Put evidence and hypotheses in \`INVESTIGATION.md\`.
 9. Put confirmed findings in \`FINDINGS.md\`.
 10. Finish with \`REPORT.md\`.
@@ -216,12 +218,12 @@ This file is the case runbook. The canonical agent workflow is \`skills/investig
 ## Useful Commands
 
 \`\`\`bash
-pnpm dev help
-pnpm dev help schema
-pnpm dev help graphql
-pnpm dev help query
-pnpm dev help mutation
-pnpm dev help research
+${cli} help
+${cli} help schema
+${cli} help graphql
+${cli} help query
+${cli} help mutation
+${cli} help research
 \`\`\`
 `;
 }
@@ -231,7 +233,7 @@ function infoTemplate(caseId: string): string {
 
 Keep this short. Target 50-100 lines total. This file is injected into the agent's working context by convention, so verbose notes dilute signal.
 
-## Customer Report
+## Issue Report
 
 ## Affected API Surface
 
@@ -283,8 +285,8 @@ Only promote a finding here after it has evidence.
 - Confidence:
 - Evidence:
 - Root cause:
-- Customer-safe next step:
-- Saleor follow-up:
+- Operator-safe next step:
+- Upstream follow-up:
 
 `;
 }
@@ -300,9 +302,9 @@ function reportTemplate(caseId: string): string {
 
 ## Root Cause
 
-## Customer-Safe Next Steps
+## Operator-Safe Next Steps
 
-## Suggested Saleor Follow-Up
+## Upstream Follow-Up
 
 ## Docs Gap
 

@@ -1,9 +1,11 @@
 import path from "node:path";
 import { caseStatus, generateCaseId, initCase, refreshCase, requireCaseId } from "../cases.js";
+import { checkInvestigationConfig } from "./configCommands.js";
 import { configureSaleorApiEnvVars } from "./start-command.js";
 
 export async function newWorkflow(caseId?: string): Promise<void> {
   await configureSaleorApiEnvVars();
+  await checkInvestigationConfig();
   await startCase(caseId);
 }
 
@@ -31,7 +33,7 @@ export async function startCase(caseId = generateCaseId()): Promise<void> {
 function workflowPrompt(root: string): string {
   return `Case is ready.
 
-If using a coding agent manually, have it read \`skills/investigate/SKILL.md\` and \`${path.join(root, "SETUP.md")}\`. The normal path is to invoke \`$investigate\` with the customer report as input and let the skill start the case.
+If using a coding agent manually, have it read the installed \`investigate\` skill and \`${path.join(root, "SETUP.md")}\`. The normal path is to invoke \`$investigate\` with the issue report as input and let the skill start the case.
 
-Keep context compact: cite artifact paths, do not paste full customer records, and put only confirmed conclusions in \`${path.join(root, "FINDINGS.md")}\`.`;
+Keep context compact: cite artifact paths, do not paste full live records, and put only confirmed conclusions in \`${path.join(root, "FINDINGS.md")}\`.`;
 }

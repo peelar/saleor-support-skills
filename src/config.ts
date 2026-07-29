@@ -1,9 +1,8 @@
-import { config as loadDotenv } from "dotenv";
+import fs from "node:fs";
 import path from "node:path";
+import { config as loadDotenv } from "dotenv";
 import { UserError } from "./errors.js";
 import type { EnvName } from "./types.js";
-
-loadDotenv();
 
 export type SaleorEnvConfig = {
   name: EnvName;
@@ -13,6 +12,8 @@ export type SaleorEnvConfig = {
 
 export type AppConfig = {
   cwd: string;
+  workspaceDir: string;
+  configPath: string;
   stateDir: string;
   casesDir: string;
   sourceDir?: string;
@@ -24,14 +25,21 @@ export const saleorApiUrlEnvVars = ["SALEOR_PROD_API_URL", "SALEOR_SANDBOX_API_U
 export type SaleorApiUrlEnvVar = (typeof saleorApiUrlEnvVars)[number];
 
 export function appConfig(): AppConfig {
-  const cwd = process.cwd();
+  const cwd = resolveWorkspaceDir();
+  const workspaceDir = path.join(cwd, ".saleor-investigate");
   return {
     cwd,
-    stateDir: path.join(cwd, ".support-agent"),
-    casesDir: path.join(cwd, "cases"),
-    sourceDir: process.env.SALEOR_SOURCE_DIR,
-    docsDir: process.env.SALEOR_DOCS_DIR,
+    workspaceDir,
+    configPath: path.join(workspaceDir, "config.env"),
+    stateDir: workspaceDir,
+    casesDir: path.join(workspaceDir, "cases"),
+    sourceDir: resolveOptionalPath(cwd, process.env.SALEOR_SOURCE_DIR),
+    docsDir: resolveOptionalPath(cwd, process.env.SALEOR_DOCS_DIR),
   };
+}
+
+export function loadInvestigationEnv(): void {
+  loadDotenv({ path: appConfig().configPath });
 }
 
 export function envConfig(name: EnvName): SaleorEnvConfig {
@@ -40,7 +48,7 @@ export function envConfig(name: EnvName): SaleorEnvConfig {
   const apiUrlEnvVar = `${prefix}_API_URL` as SaleorApiUrlEnvVar;
 
   if (!apiUrl) {
-    throw new UserError(`Missing ${apiUrlEnvVar} in environment or .env`);
+    throw new UserError(`Missing ${apiUrlEnvVar} in environment or .saleor-investigate/config.env`);
   }
 
   return {
@@ -81,4 +89,32 @@ export function parseEnvName(value: string | undefined): EnvName {
   }
 
   throw new UserError(`Expected environment to be "prod" or "sandbox", got "${value ?? ""}"`);
+}
+
+function resolveWorkspaceDir(): string {
+  const requested = process.env.SALEOR_INVESTIGATE_DIR?.trim();
+  if (requested) {
+    return path.resolve(process.cwd(), requested);
+  }
+
+  return findGitRoot(process.cwd()) ?? process.cwd();
+}
+
+function findGitRoot(start: string): string | undefined {
+  let current = path.resolve(start);
+  while (true) {
+    if (fs.existsSync(path.join(current, ".git"))) {
+      return current;
+    }
+    const parent = path.dirname(current);
+    if (parent === current) {
+      return undefined;
+    }
+    current = parent;
+  }
+}
+
+function resolveOptionalPath(root: string, value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? path.resolve(root, trimmed) : undefined;
 }

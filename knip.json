@@ -1,6 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["scripts/install-skill.mjs!"],
+  "entry": [
+    "scripts/build-skill-cli.mjs",
+    "scripts/install-skill.mjs!",
+    "skills/investigate/scripts/saleor-investigate.cjs!"
+  ],
   "includeEntryExports": true,
   "ignoreExportsUsedInFile": true
 }

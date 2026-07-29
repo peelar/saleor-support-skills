@@ -9,6 +9,10 @@ export type GraphqlResponse = {
   extensions?: unknown;
 };
 
+type RequestGraphqlOptions = {
+  acceptGraphqlErrorResponse?: boolean;
+};
+
 export async function requestGraphql(
   env: EnvName,
   query: string,
@@ -21,6 +25,7 @@ export async function requestGraphqlWithConfig(
   config: SaleorEnvConfig,
   query: string,
   variables?: Record<string, unknown>,
+  options?: RequestGraphqlOptions,
 ): Promise<GraphqlResponse> {
   if (config.name === "prod") {
     assertOnlyQueries(query);
@@ -48,9 +53,13 @@ export async function requestGraphqlWithConfig(
     throw new UserError(`GraphQL endpoint returned non-JSON response (${response.status}): ${text.slice(0, 500)}`);
   }
 
-  if (!response.ok) {
+  if (!response.ok && !(options?.acceptGraphqlErrorResponse && isGraphqlResponse(body))) {
     throw new UserError(`GraphQL request failed with HTTP ${response.status}: ${JSON.stringify(body, null, 2)}`);
   }
 
   return body as GraphqlResponse;
+}
+
+function isGraphqlResponse(body: unknown): body is GraphqlResponse {
+  return typeof body === "object" && body !== null && ("data" in body || "errors" in body);
 }

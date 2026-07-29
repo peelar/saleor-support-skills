@@ -1,6 +1,7 @@
 # Case Files
 
-Each case is a plain directory under `cases/<case-id>/`.
+Each case is a plain directory under
+`.saleor-investigate/cases/<case-id>/`.
 
 ## Intake
 
@@ -9,7 +10,7 @@ Write the user's prompt into `INFO.md` in this shape:
 ```md
 # <case-id> Info
 
-## Customer Report
+## Issue Report
 
 ## Affected API Surface
 
@@ -74,9 +75,9 @@ Finish in `REPORT.md`:
 
 ## Root Cause
 
-## Customer-Safe Next Steps
+## Operator-Safe Next Steps
 
-## Suggested Saleor Follow-Up
+## Upstream Follow-Up
 
 ## Docs Gap
 ```

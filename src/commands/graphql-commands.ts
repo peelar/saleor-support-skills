@@ -1,8 +1,9 @@
 import path from "node:path";
 import { currentCaseId, requireCaseId } from "../cases.js";
-import { envConfig } from "../config.js";
+import { appConfig, envConfig } from "../config.js";
 import { requestGraphql, requestGraphqlWithConfig, type GraphqlResponse } from "../client.js";
 import { UserError } from "../errors.js";
+import { cliInvocation } from "../invocation.js";
 import {
   assertContainsMutation,
   assertOnlyQueries,
@@ -175,7 +176,7 @@ export async function runMutationCommand(input: {
           file: input.file,
           operationKinds: kinds,
           variables,
-          message: "Prod/customer mutation was inspected locally only. No network execution was attempted.",
+          message: "Prod/live mutation was inspected locally only. No network execution was attempted.",
         },
       },
     });
@@ -257,7 +258,7 @@ function printRootField(index: SchemaIndex, rootKey: "queryType" | "mutationType
 
 async function validateIfSchemaPresent(env: EnvName, documentText: string): Promise<void> {
   if (!(await pathExists(schemaPath(env, "schema.graphql")))) {
-    console.warn(`No cached ${env} schema found. Run: pnpm ${env} schema pull`);
+    console.warn(`No cached ${env} schema found. Run: ${cliInvocation()} ${env} schema pull`);
     return;
   }
   const errors = await validateDocument(env, documentText);
@@ -274,7 +275,7 @@ async function readVariables(file?: string): Promise<Record<string, unknown> | u
 }
 
 async function writeResponse(env: EnvName, caseId: string | undefined, subdir: string, value: unknown): Promise<string> {
-  const outDir = caseId ? path.join(caseEnvDir(caseId, env), subdir) : path.join(process.cwd(), ".support-agent", "runs", env);
+  const outDir = caseId ? path.join(caseEnvDir(caseId, env), subdir) : path.join(appConfig().stateDir, "runs", env);
   await ensureDir(outDir);
   const outPath = path.join(outDir, `${timestampSlug()}.json`);
   await writeJson(outPath, value);
@@ -316,13 +317,17 @@ async function writeGraphqlResponse(input: {
 }
 
 async function introspectWithFallback(config: ReturnType<typeof envConfig>): Promise<{ response: GraphqlResponse; mode: "modern" | "compatibility" }> {
-  const modern = await requestGraphqlWithConfig(config, introspectionQuery());
+  const modern = await requestGraphqlWithConfig(config, introspectionQuery(), undefined, {
+    acceptGraphqlErrorResponse: true,
+  });
   if (!modern.errors?.length || !shouldRetryCompatibilityIntrospection(modern)) {
     return { response: modern, mode: "modern" };
   }
 
   console.warn("Modern introspection failed on compatibility-sensitive fields. Retrying with compatibility introspection.");
-  const compatibility = await requestGraphqlWithConfig(config, compatibilityIntrospectionQuery());
+  const compatibility = await requestGraphqlWithConfig(config, compatibilityIntrospectionQuery(), undefined, {
+    acceptGraphqlErrorResponse: true,
+  });
   return { response: compatibility, mode: "compatibility" };
 }
 
@@ -339,7 +344,7 @@ function inferCaseIdFromPath(filePath: string | undefined): string | undefined {
   if (!filePath) {
     return undefined;
   }
-  const relative = path.relative(path.join(process.cwd(), "cases"), filePath);
+  const relative = path.relative(appConfig().casesDir, filePath);
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
     return undefined;
   }
@@ -353,7 +358,7 @@ function draftMutationPath(env: EnvName, caseId: string | undefined, name: strin
     const dir = env === "prod" ? path.join(caseEnvDir(caseId, env), "drafted-mutations") : path.join(caseEnvDir(caseId, env), "mutations");
     return path.join(dir, fileName);
   }
-  return path.join(process.cwd(), fileName);
+  return path.join(appConfig().cwd, fileName);
 }
 
 function pascalName(value: string): string {
@@ -363,5 +368,5 @@ function pascalName(value: string): string {
     .split(/\s+/)
     .map((part) => `${part.slice(0, 1).toUpperCase()}${part.slice(1)}`)
     .join("");
-  return name || "SupportMutation";
+  return name || "InvestigationMutation";
 }

@@ -39,7 +39,7 @@ export async function writeJson(filePath: string, value: unknown): Promise<void>
 }
 
 export function resolveFromCwd(filePath: string): string {
-  return path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
+  return path.isAbsolute(filePath) ? filePath : path.join(appConfig().cwd, filePath);
 }
 
 export function caseDir(caseId: string): string {

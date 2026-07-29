@@ -15,6 +15,7 @@ import {
   schemaActionCommand,
   validateGraphqlCommand,
 } from "./commands/graphql-commands.js";
+import { checkInvestigationConfig } from "./commands/configCommands.js";
 import {
   docsPatchProposalCommand,
   docsReadCommand,
@@ -23,19 +24,27 @@ import {
   sourceSearchCommand,
 } from "./commands/researchCommands.js";
 import { newWorkflow, refreshWorkflow, startCase, statusWorkflow } from "./commands/workflow-commands.js";
-import { parseEnvName } from "./config.js";
+import { loadInvestigationEnv, parseEnvName } from "./config.js";
 import { UserError } from "./errors.js";
 import type { EnvName } from "./types.js";
+import { prepareInvestigationWorkspace } from "./workspace.js";
 
 type AsyncAction = () => Promise<void>;
+const cliName = "saleor-investigate";
 
 async function main(): Promise<void> {
   const rawArgs = process.argv.slice(2);
   const args = rawArgs[0] === "--" ? rawArgs.slice(1) : rawArgs;
+  loadInvestigationEnv();
 
   if (!args.length) {
+    await prepareInvestigationWorkspace();
     await startCase();
     return;
+  }
+
+  if (!isHelpRequest(args)) {
+    await prepareInvestigationWorkspace();
   }
 
   const [first, ...rest] = args;
@@ -45,6 +54,10 @@ async function main(): Promise<void> {
   }
 
   await runCli(buildRootCli(), args);
+}
+
+function isHelpRequest(args: string[]): boolean {
+  return args[0] === "help" || args.includes("--help") || args.includes("-h");
 }
 
 async function runCli(cli: CAC, args: string[]): Promise<void> {
@@ -64,15 +77,23 @@ async function runCli(cli: CAC, args: string[]): Promise<void> {
 }
 
 function buildRootCli(): CAC {
-  const cli = cac("pnpm dev");
+  const cli = cac(cliName);
   cli.usage("[command]");
   cli.help();
 
   registerHelp(cli);
 
   cli
-    .command("new [caseId]", "Configure endpoint URLs for coding-agent CLI commands, then create a new case")
+    .command("new [caseId]", "Configure endpoints, validate investigation config, then create a new case")
     .action((caseId?: string) => run(newWorkflow, caseId));
+  cli.command("config <action>", "Validate local investigation configuration").action((action: string) =>
+    run(async () => {
+      if (action !== "check") {
+        throw new UserError("Usage: config check");
+      }
+      await checkInvestigationConfig();
+    }),
+  );
   cli.command("status [caseId]", "Show current or named case status").action((caseId?: string) => run(statusWorkflow, caseId));
   cli.command("refresh [caseId]", "Regenerate setup markdown for current or named case").action((caseId?: string) => run(refreshWorkflow, caseId));
 
@@ -120,7 +141,7 @@ function buildRootCli(): CAC {
 }
 
 function buildEnvCli(env: EnvName): CAC {
-  const cli = cac(`pnpm ${env}`);
+  const cli = cac(`${cliName} ${env}`);
   cli.usage("[command]");
   cli.help();
 

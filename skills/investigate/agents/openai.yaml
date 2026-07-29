@@ -1,7 +1,7 @@
 interface:
   display_name: "Investigate"
-  short_description: "Investigate Saleor GraphQL support bugs"
-  default_prompt: "Use $investigate to investigate this Saleor API bug report:"
+  short_description: "Investigate Saleor API issues"
+  default_prompt: "Use $investigate to investigate this Saleor API issue:"
 
 policy:
   allow_implicit_invocation: true

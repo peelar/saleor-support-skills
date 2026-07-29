@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import {
@@ -9,15 +8,17 @@ import {
   type SaleorApiUrlEnvVar,
 } from "../config.js";
 import { UserError } from "../errors.js";
+import { prepareInvestigationWorkspace } from "../workspace.js";
 
 type EnvValueMap = Partial<Record<SaleorApiUrlEnvVar, string>>;
 
 const saleorApiUrlInputLabels: Record<SaleorApiUrlEnvVar, string> = {
-  SALEOR_PROD_API_URL: "Customer/prod Saleor GraphQL endpoint URL",
+  SALEOR_PROD_API_URL: "Live/prod Saleor GraphQL endpoint URL",
   SALEOR_SANDBOX_API_URL: "Sandbox Saleor GraphQL endpoint URL",
 };
 
 export async function configureSaleorApiEnvVars(): Promise<void> {
+  await prepareInvestigationWorkspace();
   const values: EnvValueMap = {};
   const invalidMessages: string[] = [];
 
@@ -53,14 +54,23 @@ export async function configureSaleorApiEnvVars(): Promise<void> {
 
   const promptedValues = await promptForMissingOrInvalidValues(values);
   const nextValues = completeEnvValueMap({ ...values, ...promptedValues });
-  const envPath = path.join(appConfig().cwd, ".env");
+  const envPath = appConfig().configPath;
   const changed = await writeEnvFile(envPath, nextValues);
+  await setPrivateFileMode(envPath);
 
   for (const [name, value] of Object.entries(nextValues) as Array<[SaleorApiUrlEnvVar, string]>) {
     process.env[name] = value;
   }
 
   console.log(changed ? `Saved Saleor endpoint URLs to ${envPath}` : "Saleor endpoint URLs are valid.");
+}
+
+async function setPrivateFileMode(filePath: string): Promise<void> {
+  try {
+    await fs.chmod(filePath, 0o600);
+  } catch {
+    // Some filesystems do not support Unix permissions.
+  }
 }
 
 async function promptForMissingOrInvalidValues(existingValues: EnvValueMap): Promise<EnvValueMap> {

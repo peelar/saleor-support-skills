@@ -16,8 +16,8 @@ Use these fixture patterns when a Saleor API issue needs a controlled sandbox ch
 Create files with descriptive kebab-case names under:
 
 ```text
-cases/<case-id>/sandbox/queries/
-cases/<case-id>/sandbox/mutations/
+.saleor-investigate/cases/<case-id>/sandbox/queries/
+.saleor-investigate/cases/<case-id>/sandbox/mutations/
 ```
 
 Recommended sequence names:
@@ -35,7 +35,7 @@ Recommended sequence names:
 Sandbox mutations execute with:
 
 ```bash
-pnpm sandbox mutation run cases/<case-id>/sandbox/mutations/<file>.graphql
+<CLI> sandbox mutation run .saleor-investigate/cases/<case-id>/sandbox/mutations/<file>.graphql
 ```
 
-Prod/customer mutations are never executed. Use prod mutation files only as inspection drafts.
+Prod/live mutations are never executed. Use prod mutation files only as inspection drafts.
