@@ -1,12 +1,12 @@
 # Saleor API Investigator
 
-Two coding-agent skills for investigating Saleor API issues. The main skill
-includes its own CLI, so users do not need to clone this repository or install
-its development dependencies.
+A coding-agent skill for investigating Saleor API issues. It includes its own CLI for interacting with a Saleor instance through an agent-native permissions layer.
 
 This project is for people who operate or support Saleor environments they are
 authorized to access. It keeps the live environment read-only, uses a sandbox
 for reproduction, and saves the evidence behind each conclusion.
+
+The skill requires pointing to the local [saleor/saleor](https://github.com/saleor/saleor) checkout and at least one Saleor environment for being able to reproduce the issues. 
 
 ## Install
 
@@ -21,7 +21,7 @@ runtime requirement.
 A local Saleor Core checkout is required. The skill checks its path before
 starting an investigation. A local docs checkout is optional.
 
-## Investigate an issue
+## How it works
 
 Open your coding agent anywhere inside the repository where you want to run the
 investigation. Then use:
