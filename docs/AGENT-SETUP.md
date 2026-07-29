@@ -35,12 +35,10 @@ skills/investigation-wrap-up/
   agents/openai.yaml
 ```
 
-Install them from the public repository with:
+Install them from the repository with:
 
 ```bash
-npx skills add saleor/support-agent \
-  --skill investigate \
-  --skill investigation-wrap-up
+npx skills add peelar/saleor-investigator
 ```
 
 Then invoke `$investigate` with the issue report as input. The wrap-up skill

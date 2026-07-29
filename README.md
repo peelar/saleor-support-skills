@@ -11,9 +11,7 @@ for reproduction, and saves the evidence behind each conclusion.
 ## Install
 
 ```bash
-npx skills add saleor/support-agent \
-  --skill investigate \
-  --skill investigation-wrap-up
+npx skills add peelar/saleor-investigator
 ```
 
 The installer copies only the selected skill directories. The `investigate`
@@ -44,19 +42,21 @@ The CLI keeps config, state, schemas, and cases under `.saleor-investigate/` at
 the Git root. It adds that directory to Git's local exclude file without
 changing the repository's tracked `.gitignore`.
 
-## Safety boundary
+## Permissions
 
-- `prod` means the live environment where the issue happened. Queries are
-  allowed. Mutations and subscriptions are rejected before any network request.
-- `sandbox` is an isolated environment used for reproduction. Mutations are
-  allowed within the configured token permissions.
-- Keep endpoints and tokens in `.saleor-investigate/config.env`.
-- Never commit case files, API responses, tokens, or unnecessary personal data.
-- The tool can draft an upstream docs proposal, but it never edits another
-  repository.
+The agent works through the bundled CLI. This is the safety boundary:
 
-The skill uses separate `sandbox` and `prod` CLI prefixes. Sandbox commands may
-be whitelisted. Keep prod commands approval-gated.
+- `prod` is the live environment where the issue happened. The CLI allows
+  queries, but rejects mutations and subscriptions before making a network
+  request.
+- `sandbox` is an isolated environment for reproducing the issue. The CLI
+  allows mutations within the configured token permissions.
+- The CLI can read local Saleor source and docs, and save investigation files
+  under `.saleor-investigate/`. It cannot edit those source or docs
+  repositories. Docs fixes are saved as proposals inside the case.
+
+Keep endpoints and tokens in `.saleor-investigate/config.env`. Never commit
+case files, API responses, tokens, or unnecessary personal data.
 
 See [CLI reference](docs/CLI-REFERENCE.md), [agent setup](docs/AGENT-SETUP.md),
 and the full [safety model](docs/SAFETY-MODEL.md).
