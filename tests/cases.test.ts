@@ -27,5 +27,8 @@ test("case creation writes the public investigation templates", async () => {
   await expect(fs.readFile(path.join(caseRoot, "SETUP.md"), "utf8")).resolves.toContain(
     "Use prod/live only for read-only GraphQL queries.",
   );
+  await expect(fs.readFile(path.join(caseRoot, "SETUP.md"), "utf8")).resolves.toContain(
+    "Saleor apps path: not configured",
+  );
   await expect(fs.readFile(path.join(caseRoot, "SETUP.md"), "utf8")).resolves.toContain("pnpm dev help");
 });

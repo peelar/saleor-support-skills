@@ -41,6 +41,20 @@ Then invoke `$investigate` with the issue report as input. The same skill
 resumes the active case when the user says the investigation is done or asks
 for the final report.
 
+## Investigation Paths
+
+Only the Saleor Core checkout is required. Put its path and any optional local
+checkouts in `.saleor-investigate/config.env`:
+
+```dotenv
+SALEOR_SOURCE_DIR=/absolute/path/to/saleor
+SALEOR_APPS_DIR=/absolute/path/to/apps-monorepo
+SALEOR_DOCS_DIR=/absolute/path/to/saleor-docs
+```
+
+`SALEOR_APPS_DIR` helps with apps-related troubleshooting.
+`SALEOR_DOCS_DIR` helps with local documentation research. Both are optional.
+
 The rest of this page describes repository-local development setup.
 
 For the one-time project setup:

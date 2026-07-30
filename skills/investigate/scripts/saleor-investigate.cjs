@@ -18401,6 +18401,7 @@ function appConfig() {
     stateDir: workspaceDir,
     casesDir: import_node_path.default.join(workspaceDir, "cases"),
     sourceDir: resolveOptionalPath(cwd, process.env.SALEOR_SOURCE_DIR),
+    appsDir: resolveOptionalPath(cwd, process.env.SALEOR_APPS_DIR),
     docsDir: resolveOptionalPath(cwd, process.env.SALEOR_DOCS_DIR)
   };
 }
@@ -18714,6 +18715,7 @@ This file is the case runbook. The installed \`investigate\` skill is the canoni
 - Prod endpoint: ${process.env.SALEOR_PROD_API_URL || "not configured"}
 - Sandbox endpoint: ${process.env.SALEOR_SANDBOX_API_URL || "not configured"}
 - Saleor source path: ${config.sourceDir || "not configured"}
+- Saleor apps path: ${config.appsDir || "not configured"}
 - Saleor docs path: ${config.docsDir || "not configured"}
 
 ## Required First Pass
@@ -18721,7 +18723,7 @@ This file is the case runbook. The installed \`investigate\` skill is the canoni
 1. Fill \`INFO.md\` with a short case-specific brief.
 2. Run \`${cli} help\` and topic help before using CLI tools. CLI help is the command syntax source of truth.
 3. Pull schemas if missing or stale.
-4. Search docs and source before writing GraphQL.
+4. Search Core, apps, and docs before writing GraphQL.
 5. Create focused prod query files under \`prod/queries/\`.
 6. Execute only query operations against prod.
 7. If a write is needed, create sandbox mutation files under \`sandbox/mutations/\` and run them with \`${cli} sandbox mutation run <file>\`.
@@ -18738,6 +18740,7 @@ ${cli} help graphql
 ${cli} help query
 ${cli} help mutation
 ${cli} help research
+${cli} help apps
 \`\`\`
 `;
 }
@@ -19555,6 +19558,7 @@ async function checkInvestigationConfig() {
   }
   const config = appConfig();
   const sourceDir = await validateSourceDir(config.cwd, config.sourceDir, errors);
+  await validateOptionalDirectory(config.cwd, "SALEOR_APPS_DIR", config.appsDir, errors);
   await validateOptionalDirectory(config.cwd, "SALEOR_DOCS_DIR", config.docsDir, errors);
   if (errors.length > 0) {
     throw new UserError(
@@ -19629,6 +19633,20 @@ async function sourceReadCommand(relativePath, start, count) {
   }
   await readRepositoryFile(config.sourceDir, relativePath, start, count);
 }
+async function appsSearchCommand(term) {
+  const config = appConfig();
+  if (!config.appsDir) {
+    throw new UserError("Missing SALEOR_APPS_DIR in environment or .saleor-investigate/config.env");
+  }
+  await searchRepository(config.appsDir, term);
+}
+async function appsReadCommand(relativePath, start, count) {
+  const config = appConfig();
+  if (!config.appsDir) {
+    throw new UserError("Missing SALEOR_APPS_DIR in environment or .saleor-investigate/config.env");
+  }
+  await readRepositoryFile(config.appsDir, relativePath, start, count);
+}
 async function docsSearchCommand(term) {
   const config = appConfig();
   if (!config.docsDir) {
@@ -19665,7 +19683,7 @@ async function docsPatchProposalCommand(caseId, title) {
   console.log(`Created docs patch proposal: ${outPath}`);
 }
 async function searchRepository(root, term) {
-  await run("rg", ["--line-number", "--context", "2", term, root], appConfig().cwd, true);
+  await run("rg", ["--line-number", "--context", "2", "--", term, root], appConfig().cwd, true);
 }
 async function readRepositoryFile(root, relativePath, startValue, countValue) {
   const filePath = resolveInside(root, relativePath);
@@ -20021,12 +20039,15 @@ function registerHelp(cli) {
   );
 }
 function topicCommands(cli, topic) {
-  const names = topic === "graphql" ? ["graphql-new", "graphql-validate"] : topic === "research" ? ["source", "docs"] : [topic];
+  const names = topic === "graphql" ? ["graphql-new", "graphql-validate"] : topic === "research" ? ["source", "apps", "docs"] : [topic];
   return names.map((name) => cli.commands.find((candidate) => candidate.name === name || candidate.rawName.split(" ")[0] === name)).filter((command) => command !== void 0);
 }
 function registerResearchCommands(cli) {
   cli.command("source <action> [...args]", "Search or read the configured Saleor source checkout").action(
     (action, args) => run2(() => runResearchAction("source", action, args))
+  );
+  cli.command("apps <action> [...args]", "Search or read the configured Saleor apps monorepo").action(
+    (action, args) => run2(() => runResearchAction("apps", action, args))
   );
   cli.command("docs <action> [...args]", "Search, read, or draft docs patch proposals").action(
     (action, args) => run2(() => runResearchAction("docs", action, args))
@@ -20080,6 +20101,17 @@ async function runResearchAction(kind, action, args) {
       return;
     }
     throw new UserError("Usage: source <search|read> ...");
+  }
+  if (kind === "apps") {
+    if (action === "search") {
+      await appsSearchCommand(required(args[0], "search term"));
+      return;
+    }
+    if (action === "read") {
+      await appsReadCommand(required(args[0], "relative path"), args[1], args[2]);
+      return;
+    }
+    throw new UserError("Usage: apps <search|read> ...");
   }
   if (action === "search") {
     await docsSearchCommand(required(args[0], "search term"));

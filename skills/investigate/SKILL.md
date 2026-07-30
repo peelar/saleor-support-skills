@@ -1,6 +1,6 @@
 ---
 name: investigate
-description: Use this skill when investigating or wrapping up Saleor API issues, especially GraphQL behavior involving orders, checkout, products, variants, users, customers, channels, shipping, tax, permissions, or plugins. It starts, resumes, validates, and reports on local cases; uses its bundled CLI for Saleor schema/docs/source/query/mutation work; keeps prod/live read-only; and performs writes only in sandbox. Also use when the user says an investigation is done, asks to finish or close it, or requests the final report.
+description: Use this skill when investigating or wrapping up Saleor API or app issues, especially GraphQL behavior involving orders, checkout, products, variants, users, customers, channels, shipping, tax, permissions, plugins, app protocol, webhooks, App SDK, or APL. It starts, resumes, validates, and reports on local cases; uses its bundled CLI for Saleor Core/apps/docs/schema/query/mutation work; keeps prod/live read-only; and performs writes only in sandbox. Also use when the user says an investigation is done, asks to finish or close it, or requests the final report.
 ---
 
 # Investigate Saleor API Issue
@@ -37,10 +37,11 @@ First run:
 <CLI> config check
 ```
 
-This checks the required Saleor Core checkout, the optional docs checkout, and
-any configured API endpoints without printing tokens. If it fails, read
-`references/CONFIGURATION.md`, tell the user exactly what is missing, and stop.
-Do not create a case or perform live API work until it passes.
+This checks the required Saleor Core checkout, the optional Saleor apps and
+docs checkouts, and any configured API endpoints without printing tokens. If
+it fails, read `references/CONFIGURATION.md`, tell the user exactly what is
+missing, and stop. Do not create a case or perform live API work until it
+passes.
 
 Then start the case:
 
@@ -77,6 +78,7 @@ Before using any tool group, run the relevant help command:
 - `<CLI> help query`
 - `<CLI> help mutation`
 - `<CLI> help research`
+- `<CLI> help apps`
 
 Prefer env-first commands for live GraphQL/schema work:
 
@@ -96,9 +98,11 @@ Prefer env-first commands for live GraphQL/schema work:
   token/scope or provide a replacement token with the named permission. Do not
   treat the permission gap as evidence about the reported issue, and do not
   continue that blocked branch with guesses.
-- Use local Saleor docs/source before external web research.
+- Use local Saleor Core, apps, and docs checkouts before external web research.
+- Use the optional apps checkout for app protocol, App SDK, APL, webhook, and
+  app-specific troubleshooting when it is relevant and configured.
 - If external web research is needed, use the coding agent's native web search, not this CLI.
-- Never edit or commit the Saleor source/docs repositories during an investigation.
+- Never edit or commit the Saleor Core, apps, or docs repositories during an investigation.
 - Docs fixes are proposal files under the case directory.
 
 ## Investigation Loop
@@ -107,7 +111,7 @@ Prefer env-first commands for live GraphQL/schema work:
 2. Use `<CLI> help` and topic help to discover current CLI syntax.
 3. Pull schemas if needed.
 4. Use targeted schema lookups instead of reading the whole schema.
-5. Search local docs and source for the relevant API surface.
+5. Search local Core, apps, and docs checkouts for the relevant API surface.
 6. Write the smallest prod query that can separate hypotheses.
 7. Execute only query documents against prod, using `<CLI> prod query ...`.
 8. When a GraphQL operation returns `PermissionDenied`, `FORBIDDEN`, or an equivalent

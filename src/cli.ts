@@ -17,6 +17,8 @@ import {
 } from "./commands/graphql-commands.js";
 import { checkInvestigationConfig } from "./commands/configCommands.js";
 import {
+  appsReadCommand,
+  appsSearchCommand,
   docsPatchProposalCommand,
   docsReadCommand,
   docsSearchCommand,
@@ -211,7 +213,7 @@ function topicCommands(cli: CAC, topic: string) {
     topic === "graphql"
       ? ["graphql-new", "graphql-validate"]
       : topic === "research"
-        ? ["source", "docs"]
+        ? ["source", "apps", "docs"]
         : [topic];
   return names
     .map((name) => cli.commands.find((candidate) => candidate.name === name || candidate.rawName.split(" ")[0] === name))
@@ -221,6 +223,9 @@ function topicCommands(cli: CAC, topic: string) {
 function registerResearchCommands(cli: CAC): void {
   cli.command("source <action> [...args]", "Search or read the configured Saleor source checkout").action((action: string, args: string[]) =>
     run(() => runResearchAction("source", action, args)),
+  );
+  cli.command("apps <action> [...args]", "Search or read the configured Saleor apps monorepo").action((action: string, args: string[]) =>
+    run(() => runResearchAction("apps", action, args)),
   );
   cli.command("docs <action> [...args]", "Search, read, or draft docs patch proposals").action((action: string, args: string[]) =>
     run(() => runResearchAction("docs", action, args)),
@@ -266,7 +271,7 @@ async function runMutationAction(action: string, env: EnvName, args: string[], r
   throw new UserError("Usage: mutation <draft|run> <prod|sandbox> ...");
 }
 
-async function runResearchAction(kind: "source" | "docs", action: string, args: string[]): Promise<void> {
+async function runResearchAction(kind: "source" | "apps" | "docs", action: string, args: string[]): Promise<void> {
   if (kind === "source") {
     if (action === "search") {
       await sourceSearchCommand(required(args[0], "search term"));
@@ -277,6 +282,18 @@ async function runResearchAction(kind: "source" | "docs", action: string, args: 
       return;
     }
     throw new UserError("Usage: source <search|read> ...");
+  }
+
+  if (kind === "apps") {
+    if (action === "search") {
+      await appsSearchCommand(required(args[0], "search term"));
+      return;
+    }
+    if (action === "read") {
+      await appsReadCommand(required(args[0], "relative path"), args[1], args[2]);
+      return;
+    }
+    throw new UserError("Usage: apps <search|read> ...");
   }
 
   if (action === "search") {

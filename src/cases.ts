@@ -200,6 +200,7 @@ This file is the case runbook. The installed \`investigate\` skill is the canoni
 - Prod endpoint: ${process.env.SALEOR_PROD_API_URL || "not configured"}
 - Sandbox endpoint: ${process.env.SALEOR_SANDBOX_API_URL || "not configured"}
 - Saleor source path: ${config.sourceDir || "not configured"}
+- Saleor apps path: ${config.appsDir || "not configured"}
 - Saleor docs path: ${config.docsDir || "not configured"}
 
 ## Required First Pass
@@ -207,7 +208,7 @@ This file is the case runbook. The installed \`investigate\` skill is the canoni
 1. Fill \`INFO.md\` with a short case-specific brief.
 2. Run \`${cli} help\` and topic help before using CLI tools. CLI help is the command syntax source of truth.
 3. Pull schemas if missing or stale.
-4. Search docs and source before writing GraphQL.
+4. Search Core, apps, and docs before writing GraphQL.
 5. Create focused prod query files under \`prod/queries/\`.
 6. Execute only query operations against prod.
 7. If a write is needed, create sandbox mutation files under \`sandbox/mutations/\` and run them with \`${cli} sandbox mutation run <file>\`.
@@ -224,6 +225,7 @@ ${cli} help graphql
 ${cli} help query
 ${cli} help mutation
 ${cli} help research
+${cli} help apps
 \`\`\`
 `;
 }

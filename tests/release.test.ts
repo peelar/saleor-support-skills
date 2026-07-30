@@ -33,6 +33,7 @@ test("the installed skill carries a standalone CLI", () => {
   expect(prodResult.status, prodResult.stderr).toBe(0);
   expect(result.stdout).toContain("saleor-investigate");
   expect(result.stdout).toContain("config");
+  expect(result.stdout).toContain("apps");
   expect(prodResult.stdout).toContain("saleor-investigate prod");
   expect(fs.statSync(bundlePath).mode & 0o111).not.toBe(0);
 });
@@ -50,9 +51,16 @@ test("the bundled CLI keeps consumer-repository state isolated", () => {
     fs.writeFileSync(path.join(sourceDir, "manage.py"), "");
     fs.writeFileSync(path.join(sourceDir, "pyproject.toml"), "");
 
+    const appsDir = path.join(temporaryRoot, "saleor-apps");
+    fs.mkdirSync(appsDir);
+    fs.writeFileSync(path.join(appsDir, "package.json"), '{"name":"saleor-apps"}\n');
+
     const dataDir = path.join(temporaryRoot, ".saleor-investigate");
     fs.mkdirSync(dataDir);
-    fs.writeFileSync(path.join(dataDir, "config.env"), `SALEOR_SOURCE_DIR=${sourceDir}\n`);
+    fs.writeFileSync(
+      path.join(dataDir, "config.env"),
+      `SALEOR_SOURCE_DIR=${sourceDir}\nSALEOR_APPS_DIR=${appsDir}\n`,
+    );
 
     const nested = path.join(temporaryRoot, "apps", "storefront");
     fs.mkdirSync(nested, { recursive: true });
@@ -62,6 +70,13 @@ test("the bundled CLI keeps consumer-repository state isolated", () => {
     });
     expect(configResult.status, configResult.stderr).toBe(0);
     expect(configResult.stdout).toContain(`Saleor source: ${sourceDir}`);
+
+    const appsResult = spawnSync(process.execPath, [bundlePath, "apps", "read", "package.json"], {
+      cwd: nested,
+      encoding: "utf8",
+    });
+    expect(appsResult.status, appsResult.stderr).toBe(0);
+    expect(appsResult.stdout).toContain('1: {"name":"saleor-apps"}');
 
     const caseResult = spawnSync(process.execPath, [bundlePath, "case", "init", "case-installed-smoke"], {
       cwd: nested,

@@ -28,6 +28,7 @@ Use topic help before each tool group:
 <CLI> help query
 <CLI> help mutation
 <CLI> help research
+<CLI> help apps
 <CLI> help docs
 <CLI> help source
 <CLI> sandbox help schema

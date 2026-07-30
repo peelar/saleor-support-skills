@@ -17,6 +17,7 @@ export type AppConfig = {
   stateDir: string;
   casesDir: string;
   sourceDir?: string;
+  appsDir?: string;
   docsDir?: string;
 };
 
@@ -34,6 +35,7 @@ export function appConfig(): AppConfig {
     stateDir: workspaceDir,
     casesDir: path.join(workspaceDir, "cases"),
     sourceDir: resolveOptionalPath(cwd, process.env.SALEOR_SOURCE_DIR),
+    appsDir: resolveOptionalPath(cwd, process.env.SALEOR_APPS_DIR),
     docsDir: resolveOptionalPath(cwd, process.env.SALEOR_DOCS_DIR),
   };
 }

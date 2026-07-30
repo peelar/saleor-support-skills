@@ -13,9 +13,14 @@ modify the repository's tracked `.gitignore`.
 Start with:
 
 ```dotenv
+# Required local checkout
 SALEOR_SOURCE_DIR=/absolute/path/to/saleor
+
+# Optional local checkouts
+SALEOR_APPS_DIR=/absolute/path/to/apps-monorepo
 SALEOR_DOCS_DIR=/absolute/path/to/saleor-docs
 
+# Optional environment access
 SALEOR_PROD_API_URL=https://live.example.com/graphql/
 SALEOR_PROD_TOKEN=
 
@@ -23,9 +28,10 @@ SALEOR_SANDBOX_API_URL=https://sandbox.example.com/graphql/
 SALEOR_SANDBOX_TOKEN=
 ```
 
-`SALEOR_SOURCE_DIR` is required and must point to a Saleor Core checkout.
-`SALEOR_DOCS_DIR` is optional. Paths may be absolute or relative to the
-repository root.
+Only `SALEOR_SOURCE_DIR` is required. It must point to a Saleor Core checkout.
+`SALEOR_APPS_DIR` is optional and may point to the local Saleor apps monorepo
+for apps-related troubleshooting. `SALEOR_DOCS_DIR` is also optional. All paths
+may be absolute or relative to the repository root.
 
 API endpoints and tokens are optional until a command needs that environment.
 Never put tokens in `SKILL.md`, command arguments, case Markdown, or source

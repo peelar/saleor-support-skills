@@ -23,6 +23,7 @@ export async function checkInvestigationConfig(): Promise<void> {
 
   const config = appConfig();
   const sourceDir = await validateSourceDir(config.cwd, config.sourceDir, errors);
+  await validateOptionalDirectory(config.cwd, "SALEOR_APPS_DIR", config.appsDir, errors);
   await validateOptionalDirectory(config.cwd, "SALEOR_DOCS_DIR", config.docsDir, errors);
 
   if (errors.length > 0) {
@@ -63,7 +64,7 @@ async function validateSourceDir(cwd: string, value: string | undefined, errors:
 
 async function validateOptionalDirectory(
   cwd: string,
-  name: "SALEOR_DOCS_DIR",
+  name: "SALEOR_APPS_DIR" | "SALEOR_DOCS_DIR",
   value: string | undefined,
   errors: string[],
 ): Promise<void> {

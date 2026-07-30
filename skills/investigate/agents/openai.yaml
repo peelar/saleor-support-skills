@@ -1,4 +1,4 @@
 interface:
   display_name: "Investigate"
-  short_description: "Investigate and report on Saleor API issues"
-  default_prompt: "Use $investigate to investigate or wrap up this Saleor API issue."
+  short_description: "Investigate and report on Saleor API or app issues"
+  default_prompt: "Use $investigate to investigate or wrap up this Saleor API or app issue."

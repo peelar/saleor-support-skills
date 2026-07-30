@@ -37,6 +37,7 @@ SALEOR_SANDBOX_API_URL=https://sandbox.example.com/graphql/
 SALEOR_SANDBOX_TOKEN=
 
 SALEOR_SOURCE_DIR=../saleor
+SALEOR_APPS_DIR=../apps-monorepo
 SALEOR_DOCS_DIR=../saleor-docs
 ```
 
@@ -58,10 +59,11 @@ The CLI resolves the nearest Git root and loads
 `.saleor-investigate/config.env` from there. Set `SALEOR_INVESTIGATE_DIR` in the
 process environment to use a different root.
 
-This requires a Saleor Core checkout at `SALEOR_SOURCE_DIR`. API endpoints and
-`SALEOR_DOCS_DIR` are optional at this stage, but they are validated when
-configured. Individual live commands still require their matching endpoint.
-Tokens are never printed.
+Only the Saleor Core checkout at `SALEOR_SOURCE_DIR` is required.
+`SALEOR_APPS_DIR`, `SALEOR_DOCS_DIR`, and API endpoints are optional at this
+stage, but they are validated when configured. Set `SALEOR_APPS_DIR` to a local
+Saleor apps monorepo when investigating app behavior. Individual live commands
+still require their matching endpoint. Tokens are never printed.
 
 ## Case Commands
 
@@ -114,6 +116,7 @@ pnpm prod mutation run any.graphql
 
 ```bash
 pnpm dev source search "checkoutComplete"
+pnpm dev apps search "APL"
 pnpm dev docs search "orderUpdate"
 pnpm dev docs patch-proposal "Clarify checkout completion errors"
 ```

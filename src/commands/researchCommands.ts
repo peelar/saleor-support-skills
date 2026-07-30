@@ -21,6 +21,22 @@ export async function sourceReadCommand(relativePath: string, start?: string, co
   await readRepositoryFile(config.sourceDir, relativePath, start, count);
 }
 
+export async function appsSearchCommand(term: string): Promise<void> {
+  const config = appConfig();
+  if (!config.appsDir) {
+    throw new UserError("Missing SALEOR_APPS_DIR in environment or .saleor-investigate/config.env");
+  }
+  await searchRepository(config.appsDir, term);
+}
+
+export async function appsReadCommand(relativePath: string, start?: string, count?: string): Promise<void> {
+  const config = appConfig();
+  if (!config.appsDir) {
+    throw new UserError("Missing SALEOR_APPS_DIR in environment or .saleor-investigate/config.env");
+  }
+  await readRepositoryFile(config.appsDir, relativePath, start, count);
+}
+
 export async function docsSearchCommand(term: string): Promise<void> {
   const config = appConfig();
   if (!config.docsDir) {
@@ -48,7 +64,7 @@ export async function docsPatchProposalCommand(caseId: string | undefined, title
 }
 
 async function searchRepository(root: string, term: string): Promise<void> {
-  await run("rg", ["--line-number", "--context", "2", term, root], appConfig().cwd, true);
+  await run("rg", ["--line-number", "--context", "2", "--", term, root], appConfig().cwd, true);
 }
 
 async function readRepositoryFile(root: string, relativePath: string, startValue?: string, countValue?: string): Promise<void> {
