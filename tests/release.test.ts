@@ -88,11 +88,11 @@ test("skill installer help is available without writing files", () => {
   });
 
   expect(result.status, result.stderr).toBe(0);
-  expect(result.stdout).toContain("Saleor API investigation skill");
+  expect(result.stdout).toContain("Saleor support skills");
   expect(result.stdout).toContain("--agent");
 });
 
-test("the distribution exposes one investigation skill", () => {
+test("the distribution exposes the support skills", () => {
   const skillRoot = path.join(root, "skills");
 
   expect(
@@ -100,9 +100,12 @@ test("the distribution exposes one investigation skill", () => {
       .readdirSync(skillRoot, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name),
-  ).toEqual(["investigate"]);
+  ).toEqual(["investigate", "saleor-yard"]);
   expect(fs.readFileSync(path.join(skillRoot, "investigate", "SKILL.md"), "utf8")).toContain(
     "## Wrap Up an Investigation",
+  );
+  expect(fs.readFileSync(path.join(skillRoot, "saleor-yard", "SKILL.md"), "utf8")).toContain(
+    "# Saleor Yard",
   );
 });
 

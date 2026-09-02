@@ -34,7 +34,7 @@ skills/investigate/
 Install it from the repository with:
 
 ```bash
-npx skills add peelar/saleor-investigator
+npx skills add peelar/saleor-support-skills
 ```
 
 Then invoke `$investigate` with the issue report as input. The same skill
@@ -78,4 +78,4 @@ Running `pnpm bootstrap` without `--agent` opens an interactive agent picker and
 
 Supported keys are `codex`, `claude-code`, `gemini-cli`, `windsurf`, `cursor`, `github-copilot`, `cline`, and `universal`.
 
-Skill-native agents receive a copy of the investigation skill in their native project skills directory. Agents that rely more on rules or instructions, such as Cursor, GitHub Copilot, and Cline, also receive a small adapter file that points the agent back to the canonical `skills/investigate/SKILL.md` workflow.
+Skill-native agents receive a copy of both support skills in their native project skills directory. Agents that rely more on rules or instructions, such as Cursor, GitHub Copilot, and Cline, also receive a small adapter file that points the agent back to the canonical `skills/investigate/SKILL.md` workflow.

@@ -1,27 +1,32 @@
-# Saleor API Investigator
+# Saleor Support Skills
 
-A coding-agent skill for investigating Saleor API issues. It includes its own CLI for interacting with a Saleor instance through an agent-native permissions layer.
+Coding-agent skills for investigating Saleor API issues and creating disposable
+Saleor environments.
 
 This project is for people who operate or support Saleor environments they are
-authorized to access. It keeps the live environment read-only, uses a sandbox
-for reproduction, and saves the evidence behind each conclusion.
-
-The skill requires pointing to the local [saleor/saleor](https://github.com/saleor/saleor) checkout and at least one Saleor environment for being able to reproduce the issues. 
+authorized to access. The investigation workflow keeps live environments
+read-only and saves the evidence behind each conclusion. Saleor Yard provides
+disposable environments for safe reproduction work.
 
 ## Install
 
 ```bash
-npx skills add peelar/saleor-investigator
+npx skills add peelar/saleor-support-skills
 ```
 
-The installer copies only the selected skill directories. The `investigate`
-skill carries a compiled CLI under `scripts/`. Node.js 20 or newer is the only
-runtime requirement.
+This installs two skills:
 
-A local Saleor Core checkout is required. The skill checks its path before
-starting an investigation. A local docs checkout is optional.
+- `investigate` manages evidence-backed Saleor API investigations and carries a
+  compiled CLI under `scripts/`.
+- `saleor-yard` teaches the agent to create and control disposable Saleor
+  environments through the live Saleor Yard CLI.
 
-## How it works
+Node.js 20 or newer and a local
+[saleor/saleor](https://github.com/saleor/saleor) checkout are required by the
+investigation skill. A local docs checkout is optional. The Yard skill expects
+the `saleor-yard` CLI to be available and reads its live help before acting.
+
+## Investigate an issue
 
 Open your coding agent anywhere inside the repository where you want to run the
 investigation. Then use:
@@ -42,9 +47,23 @@ The CLI keeps config, state, schemas, and cases under `.saleor-investigate/` at
 the Git root. It adds that directory to Git's local exclude file without
 changing the repository's tracked `.gitignore`.
 
+## Create a disposable environment
+
+Ask the agent to use Yard with the Saleor source you want to test:
+
+```text
+Use $saleor-yard to create a disposable environment for Saleor 3.21.
+```
+
+The agent discovers the installed CLI instead of relying on copied command
+syntax. It checks the provider, waits for Yard's ready state, keeps the exact
+environment ID and resolved Saleor commit, and deletes the environment after
+the work unless you ask to keep it.
+
 ## Permissions
 
-The agent works through the bundled CLI. This is the safety boundary:
+The investigation agent works through its bundled CLI. This is its safety
+boundary:
 
 - `prod` is the live environment where the issue happened. The CLI allows
   queries, but rejects mutations and subscriptions before making a network

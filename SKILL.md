@@ -1,6 +1,7 @@
-# Saleor API Investigator
+# Saleor Support Skills
 
-The installable skill lives at `skills/investigate/SKILL.md`.
+The installable skills live at `skills/investigate/SKILL.md` and
+`skills/saleor-yard/SKILL.md`.
 
 For normal use, open a coding agent and invoke:
 
